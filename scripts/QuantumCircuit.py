@@ -6,8 +6,9 @@ dev = qml.device("default.qubit", wires=2)
 
 @qml.qnode(dev)
 def ansatz(angles):
-    theta = angles[:12]
-    basis = angles[12:]  # basis has two elements with values 0 or 1
+    nrAngles = len(angles)-2
+    theta = angles[:nrAngles]
+    basis = angles[nrAngles:]  # basis has two elements with values 0 or 1
 
     # inital rotations
     qml.RX(theta[0], wires=0)
@@ -24,14 +25,14 @@ def ansatz(angles):
     qml.RX(theta[6], wires=1)
     qml.RZ(theta[7], wires=1)
 
-    #CNOT to entangle
-    qml.CZ(wires = [0,1])
+    # #CNOT to entangle
+    # qml.CZ(wires = [0,1])
 
-    # third round of rotations
-    qml.RX(theta[8], wires=0)
-    qml.RZ(theta[9], wires=0)
-    qml.RX(theta[10], wires=1)
-    qml.RZ(theta[11], wires=1)
+    # # third round of rotations
+    # qml.RX(theta[8], wires=0)
+    # qml.RZ(theta[9], wires=0)
+    # qml.RX(theta[10], wires=1)
+    # qml.RZ(theta[11], wires=1)
 
     qml.U3(basis[0]*np.pi/2, 0, basis[0]*np.pi, wires=0)  # apply hadamard gate to qubit 0 iff basis[0]=1
     qml.U3(basis[1]*np.pi/2, 0, basis[1]*np.pi, wires=1)  # apply hadamard gate to qubit 1 iff basis[1]=1
@@ -68,47 +69,60 @@ def energy(R,probs_XX, probs_XZ, probs_ZX, probs_ZZ):
 
     return E_H
 
-def optimize(R,theta,c,eta,shots, iterations):
-	energy_list = []
-	params = len(theta)
+def optimize(R,theta,c,eta,shots, minChange):
+    energy_list = []
+    params = len(theta)
 
-	for i in range(iterations):
+    #compute initial energy
+    angles = [[theta[k]]*4 for k in range(params)]
+    basis  = [[1,1,0,0],[1,0,1,0]]
+    angles = np.array(angles + basis)
 
-	    angles = [[]]*params
-	    basis = [[]]*2
-	    gradient = []
-	    for j in range(params):
-	        e = np.zeros(params)
-	        e[j] = 1
-	        theta_plus = theta.copy() + c*e
-	        theta_minus = theta.copy() - c*e
+    probs = ansatz(angles, shots=shots)
+    E_new = energy(R,probs[0], probs[1], probs[2], probs[3])
+    energy_list.append(E_new)
 
-	        angles = [angles[k] + [theta_plus[k]]*4 for k in range(params)]
-	        basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
-	        angles = [angles[k] + [theta_minus[k]]*4 for k in range(params)]
-	        basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
+    iterations = 0
+    while True:
+        E_old = E_new
 
-	    angles = [angles[k] + [theta[k]]*4 for k in range(params)]
-	    basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
-	    angles = np.array(angles + basis)
-	    probs = ansatz(angles, shots=shots)
+        angles = [[]]*params
+        basis = [[]]*2
+        gradient = []
+        for j in range(params):
+            e = np.zeros(params)
+            e[j] = 1
+            theta_plus = theta.copy() + c*e
+            theta_minus = theta.copy() - c*e
 
-	    for j in range(params):
-	        E_plus = energy(R,probs[8*j], probs[8*j+1], probs[8*j+2], probs[8*j+3])
-	        E_minus = energy(R,probs[8*j+4], probs[8*j+5], probs[8*j+6], probs[8*j+7])
-	        gradient.append( (E_plus - E_minus)/(2*c) )  # approximate gradient
+            angles = [angles[k] + [theta_plus[k]]*4 for k in range(params)]
+            basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
+            angles = [angles[k] + [theta_minus[k]]*4 for k in range(params)]
+            basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
 
-	    energy_list.append(energy(R,probs[8*params], probs[8*params+1], probs[8*params+2], probs[8*params+3]))
-	    theta = theta - eta*np.array(gradient)  # update the angles using gradient descent!
-	    #print(f"Energy at iteration {i}: {energy_list[-1]}")
+        angles = np.array(angles+basis)
+        probs = ansatz(angles, shots=shots)
 
-	angles = [[theta[k]]*4 for k in range(params)]
-	basis  = [[1,1,0,0],[1,0,1,0]]
-	angles = np.array(angles + basis)
+        #optimization proeccess
+        for j in range(params):
+            E_plus = energy(R,probs[8*j], probs[8*j+1], probs[8*j+2], probs[8*j+3])
+            E_minus = energy(R,probs[8*j+4], probs[8*j+5], probs[8*j+6], probs[8*j+7])
+            gradient.append( (E_plus - E_minus)/(2*c) )  # approximate gradient
 
-	probs = ansatz(angles, shots=shots)
-	E_final = energy(R,probs[0], probs[1], probs[2], probs[3])
-	energy_list.append( E_final )  # final energy!
+        theta = theta - eta*np.array(gradient)  # update the angles using gradient descent!
 
-	#print(f"Final energy: {energy_list[-1]}")
-	return energy_list
+        #new energy
+        angles = [[theta[k]]*4 for k in range(params)]
+        basis  = [[1,1,0,0],[1,0,1,0]]
+        angles = np.array(angles + basis)
+
+        probs = ansatz(angles, shots=shots)
+        E_new = energy(R,probs[0], probs[1], probs[2], probs[3])
+        energy_list.append(E_new)
+        iterations += 1
+
+        changeInE = np.abs(E_new-E_old)
+        if changeInE<minChange:
+            break
+
+    return energy_list, iterations
