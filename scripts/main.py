@@ -10,8 +10,8 @@ c = 0.05*2*np.pi
 eta = 0.5
 shots = 8192
 
-energy_list, iterations = qc.optimize(R,theta,c,eta,shots,0.01)
+#energy_list, iterations = qc.optimize(R,theta,c,eta,shots,0.0001)
 
 # plots
 #plots.plotOptimisation(R,energy_list,iterations)
-plots.plotEAgainstR(theta, c, eta, shots, 0.01)
+plots.plotEAgainstR(theta, c, eta, shots,[50,250] ,0.001)

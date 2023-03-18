@@ -16,9 +16,9 @@ def plotOptimisation(R,energy_list,iterations):
 	ax.legend()
 	plt.show()
 
-def plotEAgainstR(theta,c,eta,shots,minChange):
+def plotEAgainstR(theta,c,eta,shots,RRange,minChange):
 	parameters = np.loadtxt("HamiltonianParameters.txt")
-	RArray = parameters[10:30,0]
+	RArray = parameters[int(RRange[0]/5-1):int(RRange[1]/5),0]
 	exactE = [ex.exactEnergy(R) for R in RArray]
 	approxE = [qc.optimize(R, theta, c, eta, shots, minChange)[0][-1] for R in RArray]
 
@@ -29,3 +29,4 @@ def plotEAgainstR(theta,c,eta,shots,minChange):
 	ax.set_ylabel('E')
 	ax.legend()
 	plt.show()
+	fig.savefig('../plots/Eplot.png',format='png')
