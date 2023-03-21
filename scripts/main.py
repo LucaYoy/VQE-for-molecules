@@ -5,7 +5,7 @@ import ExactSolution as ex
 import plots
 from qiskit import IBMQ
 
-R = 90
+R = 70
 theta = 2*np.pi*np.random.rand(8)
 c = 0.05*2*np.pi
 eta = 0.5
