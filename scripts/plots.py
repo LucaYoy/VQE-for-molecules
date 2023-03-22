@@ -19,16 +19,13 @@ def plotOptimisation(R,energy_list,iterations):
 	plt.show()
 	fig.savefig('../plots/optimizationPlot.png',format='png')
 
-def plotEAgainstR(dev,theta,c,eta,shots,RRange,minChange):
-	parameters = np.loadtxt("HamiltonianParameters.txt")
-	RArray = parameters[int(RRange[0]/5-1):int(RRange[1]/5),0]
-	exactE = [ex.exactEnergy(R) for R in RArray]
-	circuit = qc.QuantumCircuit(dev)
-	approxE = [circuit.optimize(R, theta, c, eta, shots, minChange)[0][-1] for R in RArray]
-
+def plotEAgainstR(RArray,exactE,approxESim,approxE_IBM=None):
 	fig, ax = plt.subplots()
 	ax.plot(RArray,exactE,'k-',label='Exact')
-	ax.plot(RArray,approxE,'x-',label='VQE')
+	ax.plot(RArray,approxESim,'bx-',label='VQE_Simulation')
+	if approxE_IBM:
+		ax.plot(RArray,approxE_IBM,'or-',label='VQE_IBM')
+
 	ax.set_xlabel('R')
 	ax.set_ylabel('E')
 	ax.legend()

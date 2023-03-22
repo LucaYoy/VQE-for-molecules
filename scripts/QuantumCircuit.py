@@ -73,26 +73,15 @@ class QuantumCircuit:
 
         return E_H
 
-    def optimize(self,R,theta,c,eta,shots, minChange):
+    def optimize(self,R,theta,c,eta,shots, iterations):
         energy_list = []
         params = len(theta)
 
-        #compute initial energy
-        angles = [[theta[k]]*4 for k in range(params)]
-        basis  = [[1,1,0,0],[1,0,1,0]]
-        angles = np.array(angles + basis)
-
-        probs = self.ansatz(self.dev)(angles,shots=shots)
-        E_new = self.energy(R,probs[0], probs[1], probs[2], probs[3])
-        energy_list.append(E_new)
-
-        iterations = 0
-        while True:
-            E_old = E_new
-
+        for i in range(iterations):
             angles = [[]]*params
             basis = [[]]*2
             gradient = []
+
             for j in range(params):
                 e = np.zeros(params)
                 e[j] = 1
@@ -104,6 +93,8 @@ class QuantumCircuit:
                 angles = [angles[k] + [theta_minus[k]]*4 for k in range(params)]
                 basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
 
+            angles = [angles[kk] + [theta[kk]]*4 for kk in range(params)]
+            basis  = [basis[0] + [1,1,0,0], basis[1] + [1,0,1,0]]
             angles = np.array(angles+basis)
             probs = self.ansatz(self.dev)(angles,shots=shots)
 
@@ -113,20 +104,16 @@ class QuantumCircuit:
                 E_minus = self.energy(R,probs[8*j+4], probs[8*j+5], probs[8*j+6], probs[8*j+7])
                 gradient.append( (E_plus - E_minus)/(2*c) )  # approximate gradient
 
+            energy_list.append(self.energy(R,probs[8*params], probs[8*params+1], probs[8*params+2], probs[8*params+3]))
             theta = theta - eta*np.array(gradient)  # update the angles using gradient descent!
 
-            #new energy
-            angles = [[theta[k]]*4 for k in range(params)]
-            basis  = [[1,1,0,0],[1,0,1,0]]
-            angles = np.array(angles + basis)
+        #final energy
+        angles = [[theta[k]]*4 for k in range(params)]
+        basis  = [[1,1,0,0],[1,0,1,0]]
+        angles = np.array(angles + basis)
 
-            probs = self.ansatz(self.dev)(angles,shots=shots)
-            E_new = self.energy(R,probs[0], probs[1], probs[2], probs[3])
-            energy_list.append(E_new)
-            iterations += 1
+        probs = self.ansatz(self.dev)(angles,shots=shots)
+        E_final = self.energy(R,probs[0], probs[1], probs[2], probs[3])
+        energy_list.append(E_final)
 
-            changeInE = np.abs(E_new-E_old)
-            if changeInE<minChange:
-                break
-
-        return energy_list, iterations
+        return energy_list
