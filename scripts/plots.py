@@ -10,14 +10,14 @@ def plotCircuit(dev,theta):
 	qml.draw_mpl(circuit.ansatz)(list(theta)+[0,1])
 	fig.savefig('../plots/circuitPlot.png',format='png')
 
-def plotOptimisation(R,energy_list,iterations):
+def plotOptimisation(R,energy_list,iterations,i=''):
 	fig, ax = plt.subplots()
 	ax.plot([0,iterations],[ex.exactEnergy(R),ex.exactEnergy(R)],'--',color='k',label='Exact')
 	ax.plot(energy_list,'o',label='VQE')
-	ax.set(xlabel = 'iterations', ylabel = 'energy')
+	ax.set(xlabel = 'log(iterations)', ylabel = 'log(energy)')
 	ax.legend()
-	plt.show()
-	fig.savefig('../plots/optimizationPlot.png',format='png')
+	#plt.show()
+	fig.savefig(f'../plots/{R}optimizationPlot{i}.png',format='png')
 
 def plotEAgainstR(RArray,exactE,approxESim,approxE_IBM=None):
 	fig, ax = plt.subplots()
