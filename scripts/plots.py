@@ -4,20 +4,18 @@ import QuantumCircuit as qc
 import ExactSolution as ex
 from matplotlib import pyplot as plt
 
-def plotCircuit(dev,theta):
-	qml.drawer.use_style("black_white")
-	circuit = qc.QuantumCircuit(dev)
-	qml.draw_mpl(circuit.ansatz)(list(theta)+[0,1])
-	fig.savefig('../plots/circuitPlot.png',format='png')
-
-def plotOptimisation(R,energy_list,iterations,i=''):
+def plotOptimisation(R,energy_listFOGD,energy_listSOGD,energy_listPS,energy_listSPSA,iterations,layers,i=''):
 	fig, ax = plt.subplots()
 	ax.plot([0,iterations],[ex.exactEnergy(R),ex.exactEnergy(R)],'--',color='k',label='Exact')
-	ax.plot(energy_list,'o',label='VQE')
-	ax.set(xlabel = 'log(iterations)', ylabel = 'log(energy)')
+	ax.plot(energy_listFOGD,'bo-',label='VQE-FirstOrderGD')
+	ax.plot(energy_listSOGD,'ro-',label='VQE-SecondOrderGD')
+	ax.plot(energy_listPS,'go-',label='VQE-ParameterShiftGD')
+	ax.plot(energy_listSPSA,'ko-',label='VQE-SPSA')
+	ax.set(xlabel = 'iterations', ylabel = 'energy')
 	ax.legend()
-	#plt.show()
-	fig.savefig(f'../plots/{R}optimizationPlot{i}.png',format='png')
+	plt.show()
+	fig.set_size_inches(16,12)
+	fig.savefig(f'../plots/{R}optimizationPlotWith{layers}Layers{i}.png',format='png',dpi=100)
 
 def plotEAgainstR(RArray,exactE,approxESim,approxE_IBM=None):
 	fig, ax = plt.subplots()
@@ -30,4 +28,24 @@ def plotEAgainstR(RArray,exactE,approxESim,approxE_IBM=None):
 	ax.set_ylabel('E')
 	ax.legend()
 	plt.show()
-	fig.savefig('../plots/Eplot.png',format='png')
+	fig.set_size_inches(16,12)
+	fig.savefig('../plots/Eplot.png',format='png',dpi=100)
+
+def plotDeltaE_layers(maxLayers,approxEArray,exactE):
+	fig, ax = plt.subplots()
+	ax.plot(range(1,len(approxEArray)+1),np.abs(approxEArray - exactE),'xb')
+	ax.set_xlabel('Layers')
+	ax.set_ylabel('|deltaE|')
+
+	plt.show()
+	fig.set_size_inches(16,12)
+	fig.savefig('../plots/deltaE_layers.png',format='png',dpi=100)
+
+
+
+
+
+
+
+
+

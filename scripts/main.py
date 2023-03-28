@@ -5,17 +5,17 @@ import ExactSolution as ex
 import plots
 from qiskit import IBMQ
 
-R = 100
-
+R = 90
+theta = 2*np.pi*np.random.rand(8)
 c = 0.05*2*np.pi
 eta = 1
 shots = 8192
-iterations = 30
+iterations = 50
 RRange = [50,250]
 parameters = np.loadtxt("HamiltonianParameters.txt")
 RArray = parameters[int(RRange[0]/5-1):int(RRange[1]/5),0]
 
-exactE = [ex.exactEnergy(R) for R in RArray]
+exactEArray = [ex.exactEnergy(R) for R in RArray]
 
 dev1 = qml.device("default.qubit", wires=2)
 circuitSim = qc.QuantumCircuit(dev1)
@@ -25,9 +25,16 @@ circuitSim = qc.QuantumCircuit(dev1)
 # circuitReal = qc.QuantumCircuit(dev2)
 # energy_listRe, iterationsRe = circuitReal.optimize(R,theta,c,eta,shots,0.001)
 
-for i in range(10):
-	theta = 2*np.pi*np.random.rand(8)
-	energy_listSim = circuitSim.optimize(R,theta,c,eta,shots,iterations)
-	plots.plotOptimisation(R,energy_listSim,iterations,i=i)
+# circuitSim.plotCircuit(theta)
+# energy_listSimSOGD = circuitSim.optimize(R,theta,c,eta,shots,iterations,SOGD=True)
+# energy_listSimFOGD = circuitSim.optimize(R,theta,c,eta,shots,iterations,FOGD=True)
+# energy_listSimPS = circuitSim.optimize(R,theta,c,eta,shots,iterations,PS=True)
+# energy_listSimSPSA = circuitSim.optimize(R,theta,0.2,eta,shots,iterations,SPSA=True)
+# plots.plotOptimisation(R,energy_listSimFOGD,energy_listSimSOGD,energy_listSimPS,energy_listSimSPSA,iterations,len(theta)/4-1)
+# plots.plotEAgainstR(RArray,exactEArray,approxESim)
 
-#plots.plotEAgainstR(RArray,exactE,approxESim)
+maxLayers = 5
+nrOfparamList = range(8,(maxLayers+1)*4+1,4)
+exactE = ex.exactEnergy(R)
+approxEArray = [circuitSim.optimize(R, 2*np.pi*np.random.rand(i), c, eta, shots, iterations,SOGD=True)[-1] for i in nrOfparamList]
+plots.plotDeltaE_layers(maxLayers, approxEArray, exactE)
