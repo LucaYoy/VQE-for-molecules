@@ -70,7 +70,7 @@ class QuantumCircuit:
 
         return E_H
 
-    def optimize(self,R,theta,c,eta,shots, iterations,FOGD=False,SOGD=False,SPSA=False,PS=False,aSPSA=2):
+    def optimize(self,R,theta,c,eta,shots, iterations,method,aSPSA=2):
         energy_list = []
         params = len(theta)
 
@@ -79,11 +79,11 @@ class QuantumCircuit:
             basis = [[]]*2
             gradient = []
 
-            if SOGD or FOGD or PS:
+            if method=='SOGD' or method=='FOGD' or method=='PS':
                 for j in range(params):
                     e = np.zeros(params)
                     e[j] = 1
-                    if PS:
+                    if method=='PS':
                         theta_plus = theta.copy() + (np.pi/2)*e
                         theta_minus = theta.copy() - (np.pi/2)*e
                     else:
@@ -106,9 +106,9 @@ class QuantumCircuit:
                     E_plus = self.energy(R,probs[8*j], probs[8*j+1], probs[8*j+2], probs[8*j+3])
                     E_minus = self.energy(R,probs[8*j+4], probs[8*j+5], probs[8*j+6], probs[8*j+7])
 
-                    if FOGD:
-                        gradient.append(E_plus-energy_list[-1]/c) #FOGD
-                    elif SOGD:
+                    if method=='FOGD':
+                        gradient.append((E_plus-energy_list[-1])/c) #FOGD
+                    elif method=='SOGD':
                         gradient.append( (E_plus - E_minus)/(2*c) )  # approximate gradient SOGD
                     else:
                         gradient.append( (E_plus - E_minus)/2 ) #PS
@@ -136,7 +136,7 @@ class QuantumCircuit:
 
                 gradient = (E_plus - E_minus)/(2*c_i*e)  # approximate gradient
 
-            if SPSA:
+            if method=='SPSA':
                 theta = theta - a_i*np.array(gradient)
             else:
                 theta = theta - eta*np.array(gradient)  # update the angles using gradient descent!

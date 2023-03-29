@@ -17,21 +17,21 @@ def plotOptimisation(R,energy_listFOGD,energy_listSOGD,energy_listPS,energy_list
 	fig.set_size_inches(16,12)
 	fig.savefig(f'../plots/{R}optimizationPlotWith{layers}Layers{i}.png',format='png',dpi=100)
 
-def plotEAgainstR(RArray,exactE,approxESim,approxE_IBM=None):
+def plotEAgainstR(RArray,exactE,approxESim,layers,method,approxE_IBM=None):
 	fig, ax = plt.subplots()
 	ax.plot(RArray,exactE,'k-',label='Exact')
 	ax.plot(RArray,approxESim,'bx-',label='VQE_Simulation')
 	if approxE_IBM:
-		ax.plot(RArray,approxE_IBM,'or-',label='VQE_IBM')
+		ax.plot(RArray,approxE_IBM,'rx-',label='VQE_IBM')
 
 	ax.set_xlabel('R')
 	ax.set_ylabel('E')
 	ax.legend()
 	plt.show()
 	fig.set_size_inches(16,12)
-	fig.savefig('../plots/Eplot.png',format='png',dpi=100)
+	fig.savefig(f'../plots/Eplot_{method}_{layers}Layers.png',format='png',dpi=100)
 
-def plotDeltaE_layers(maxLayers,approxEArray,exactE):
+def plotDeltaE_layers(R,approxEArray,exactE,method):
 	fig, ax = plt.subplots()
 	ax.plot(range(1,len(approxEArray)+1),np.abs(approxEArray - exactE),'xb')
 	ax.set_xlabel('Layers')
@@ -39,7 +39,7 @@ def plotDeltaE_layers(maxLayers,approxEArray,exactE):
 
 	plt.show()
 	fig.set_size_inches(16,12)
-	fig.savefig('../plots/deltaE_layers.png',format='png',dpi=100)
+	fig.savefig(f'../plots/deltaE_layers_{R}_{method}.png',format='png',dpi=100)
 
 
 
