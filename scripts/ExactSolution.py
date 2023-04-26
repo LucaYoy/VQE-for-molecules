@@ -1,9 +1,10 @@
 import numpy as np
 import UsefulGates as g
+import pennylane as qml
 
 parameters = np.loadtxt("HamiltonianParameters.txt")
 
-def Hamiltonian(R,XI,IX,ZI,IZ,XX,ZZ,XZ,ZX,II):
+def Hamiltonian(R):
     H_param = parameters[parameters[:,0]==R,1:].flatten()
 
     C = H_param[0]
@@ -16,17 +17,15 @@ def Hamiltonian(R,XI,IX,ZI,IZ,XX,ZZ,XZ,ZX,II):
     #Jzx = H_param[7]
     Jzz = H_param[8]
 
-    H = Jx * (XI + IX)
-    H = H + Jz * (ZI + IZ)
-    H = H + Jxx * XX
-    H = H + Jzz * ZZ
-    H = H + Jxz * (XZ + ZX)
-    H = H + C * II
+    H = Jx * (qml.PauliX(0) + qml.PauliX(1))
+    H = H + Jz * (qml.PauliZ(0) + qml.PauliZ(1))
+    H = H + Jxx * qml.PauliX(0)@qml.PauliX(1)
+    H = H + Jzz * qml.PauliZ(0)@qml.PauliZ(1)
+    H = H + Jxz * (qml.PauliX(0)@qml.PauliZ(1) + qml.PauliZ(0)@qml.PauliX(1))
+    H = H + C*qml.Identity(0)@qml.Identity(1)
 
-    return H/2
+    return H*0.5
 
-def exactEnergy(R):
-    H = Hamiltonian(R,np.kron(g.X,g.Id),np.kron(g.Id,g.X),np.kron(g.Z,g.Id),np.kron(g.Id,g.Z),np.kron(g.X,g.X),np.kron(g.Z,g.Z),np.kron(g.X,g.Z),np.kron(g.Z,g.X),np.kron(g.Id,g.Id))
-
+def exactEnergy(H):
     E, V = np.linalg.eigh(H)
     return np.min(E)

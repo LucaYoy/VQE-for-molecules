@@ -4,19 +4,23 @@ import QuantumCircuit as qc
 import ExactSolution as ex
 from matplotlib import pyplot as plt
 
-def plotOptimisation(R,energy_listFOGD,energy_listSOGD,energy_listPS,energy_listSPSA,iterations,layers,IBM_dict={'energyArray':[],'method':''},i=''):
+def plotOptimisation(Hmatrix,energy_listFOGD,energy_listSOGD,energy_listPS,energy_listSPSA,iterations,layers,IBM_dict={'energyArray':[],'method':''},i=''):
 	fig, ax = plt.subplots()
-	ax.plot([0,iterations],[ex.exactEnergy(R),ex.exactEnergy(R)],'--',color='k',label='Exact')
+	ax.plot([0,iterations],[ex.exactEnergy(Hmatrix),ex.exactEnergy(Hmatrix)],'--',color='k',label='Exact')
 	ax.plot(energy_listFOGD,'bo-',label='VQE-FirstOrderGD')
 	ax.plot(energy_listSOGD,'ro-',label='VQE-SecondOrderGD')
 	ax.plot(energy_listPS,'go-',label='VQE-ParameterShiftGD')
 	ax.plot(energy_listSPSA,'ko-',label='VQE-SPSA')
 	ax.plot(IBM_dict['energyArray'],'o-',label=f"IBM-VQE-{IBM_dict['method']}")
-	ax.set(xlabel = 'iterations', ylabel = 'energy')
-	ax.legend()
+	ax.set_xlabel('iterations',fontsize=9)
+	ax.set_ylabel('E',fontsize=9)
+	ax.tick_params(axis='x', labelsize=9)
+	ax.tick_params(axis='y', labelsize=9)
+	ax.legend(prop={'size': 5})
+	fig.set_size_inches(3.4,2.1)
+	plt.subplots_adjust(bottom=0.19,left=0.2)
+	fig.savefig(f'../plots/optimizationPlotWith{layers}Layers{i}.pdf',format='pdf',dpi=100)
 	plt.show()
-	fig.set_size_inches(16,12)
-	fig.savefig(f'../plots/{R}optimizationPlotWith{layers}Layers{i}.pdf',format='pdf',dpi=100)
 
 def plotEAgainstR(RArray,exactE,approxESim,layers,method,approxE_IBM=None):
 	fig, ax = plt.subplots()
@@ -25,22 +29,29 @@ def plotEAgainstR(RArray,exactE,approxESim,layers,method,approxE_IBM=None):
 	if approxE_IBM:
 		ax.plot(approxE_IBM[0],approxE_IBM[1],'rx',label='VQE_IBM')
 
-	ax.set_xlabel('R')
-	ax.set_ylabel('E')
-	ax.legend()
-	plt.show()
-	fig.set_size_inches(16,12)
+	ax.set_xlabel('R',fontsize=9)
+	ax.set_ylabel('E',fontsize=9)
+	ax.tick_params(axis='x', labelsize=9)
+	ax.tick_params(axis='y', labelsize=9)
+	ax.legend(prop={'size': 5})
+	fig.set_size_inches(3.4,2.1)
+	plt.subplots_adjust(bottom=0.19,left=0.2)
 	fig.savefig(f'../plots/Eplot_{method}_{layers}Layers.pdf',format='pdf',dpi=100)
+	plt.show()
 
 def plotDeltaE_layers(R,approxEArray,exactE,method):
 	fig, ax = plt.subplots()
 	ax.plot(range(1,len(approxEArray)+1),np.abs(approxEArray - exactE),'xb')
-	ax.set_xlabel('Layers')
-	ax.set_ylabel('|deltaE|')
+	ax.set_xlabel('Layers',fontsize=9)
+	ax.set_ylabel('|deltaE|',fontsize=9)
 
-	plt.show()
-	fig.set_size_inches(16,12)
+	ax.tick_params(axis='x', labelsize=9)
+	ax.tick_params(axis='y', labelsize=9)
+	ax.legend(prop={'size': 5})
+	fig.set_size_inches(3.4,2.1)
+	plt.subplots_adjust(bottom=0.19,left=0.2)
 	fig.savefig(f'../plots/deltaE_layers_{R}_{method}.pdf',format='pdf',dpi=100)
+	plt.show()
 
 
 
