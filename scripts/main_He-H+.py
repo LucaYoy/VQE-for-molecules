@@ -49,11 +49,11 @@ with open('energy_listRe90.pkl','rb') as f:
 with open('energy_listRe105.pkl','rb') as f:
 	energy_listRe105 = pickle.load(f)
 
-# IBM75 = {'energyArray':energy_listRe75,'method':'SOGD'}
-#IBM90 = {'energyArray':energy_listRe90,'method':'SOGD'}
-# IBM105 = {'energyArray':energy_listRe105,'method':'SOGD'}
+IBM75 = {'energyArray':energy_listRe75,'method':'SOGD'}
+IBM90 = {'energyArray':energy_listRe90,'method':'SOGD'}
+IBM105 = {'energyArray':energy_listRe105,'method':'SOGD'}
 # plots.plotOptimisation(75,[],[],[],[],iterations,layers,IBM75,i='Eta0.8')
-#plots.plotOptimisation(Hmatrix,[],energy_listRe90,[],[],iterations,layers,IBM90,i='Eta0.8')
+#plots.plotOptimisation(Hmatrix,[],[],[],[],iterations,layers,IBM90,i='Eta0.8')
 # plots.plotOptimisation(105,[],[],[],[],iterations,layers,IBM105,i='Eta0.8')
 
 exactEArray = [ex.exactEnergy(qml.matrix(ex.Hamiltonian(R))) for R in RArray]
@@ -61,9 +61,8 @@ approxESim = [qc.QuantumCircuit(dev1,ex.Hamiltonian(R)).optimize(theta, c, eta, 
 approxERe = [(75,90,105),(energy_listRe75[-1],energy_listRe90[-1],energy_listRe105[-1])]
 plots.plotEAgainstR(RArray,exactEArray,approxESim,layers,method='SOGD',approxE_IBM=approxERe)
 
-'''maxLayers = 5
-nrOfparamList = range(8,(maxLayers+1)*4+1,4)
-exactE = ex.exactEnergy(R)
-approxEArray = [circuitSim.optimize(R, 2*np.pi*np.random.rand(i), c, eta, shots, iterations,method='SOGD')[-1] for i in nrOfparamList]
-plots.plotDeltaE_layers(R, approxEArray, exactE,method='SPSA')
-'''
+# maxLayers = 5
+# nrOfparamList = range(8,(maxLayers+1)*4+1,4)
+# exactE = ex.exactEnergy(Hmatrix)
+# approxEArray = [circuitSim.optimize(2*np.pi*np.random.rand(i), c, eta, shots, iterations,method='PS')[-1] for i in nrOfparamList]
+# plots.plotDeltaE_layers(R, approxEArray, exactE,method='PS')

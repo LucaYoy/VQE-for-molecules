@@ -1,5 +1,4 @@
 import numpy as np
-import UsefulGates as g
 import pennylane as qml
 
 parameters = np.loadtxt("HamiltonianParameters.txt")
@@ -26,6 +25,6 @@ def Hamiltonian(R):
 
     return H*0.5
 
-def exactEnergy(H):
-    E, V = np.linalg.eigh(H)
+def exactEnergy(Hmatrix):
+    E, V = np.linalg.eigh(Hmatrix)
     return np.min(E)
