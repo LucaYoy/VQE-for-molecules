@@ -21,30 +21,38 @@ H,qb = qml.qchem.molecular_hamiltonian(sym,coord,active_electrons=4,active_orbit
 Hmatrix = qml.matrix(H)
 # print(Hmatrix)
 
-layers = 1
+layers = 3
 theta = 2*np.pi*np.random.rand((layers+1)*2*qb)
 c = 0.05*2*np.pi
-eta = 0.8
+eta = 1.6
 shots = 8192
 iterations = 100
 with open(f'../pklFiles/H2O/exactEArray_HOH_phi','rb') as f:
 	exactEArray = pickle.load(f)
 
-with open(f'../pklFiles/H2O/energy_listSimFOGD_phi={phi}_layers={layers}_iteration={iterations}','rb') as f:
+with open(f'../pklFiles/H2O/energy_listSimFOGD_phi={phi}_layers={layers}_iteration={iterations}_eta={eta}','rb') as f:
 	energy_listSimFOGD = pickle.load(f)
-with open(f'../pklFiles/H2O/energy_listSimSOGD_phi={phi}_layers={layers}_iteration={iterations}','rb') as f:
+with open(f'../pklFiles/H2O/energy_listSimSOGD_phi={phi}_layers={layers}_iteration={iterations}_eta={eta}','rb') as f:
 	energy_listSimSOGD = pickle.load(f)
-with open(f'../pklFiles/H2O/energy_listSimSPSA_phi={phi}_layers={layers}_iteration={iterations}','rb') as f:
+with open(f'../pklFiles/H2O/energy_listSimSPSA_phi={phi}_layers={layers}_iteration={iterations}_eta={eta}','rb') as f:
 	energy_listSimSPSA = pickle.load(f)
-with open(f'../pklFiles/H2O/energy_listSimPS_phi={phi}_layers={layers}_iteration={iterations}','rb') as f:
+with open(f'../pklFiles/H2O/energy_listSimPS_phi={phi}_layers={layers}_iteration={iterations}_eta={eta}','rb') as f:
 	energy_listSimPS = pickle.load(f)
 
-plots.plotOptimisation(Hmatrix, energy_listSimFOGD, energy_listSimSOGD, energy_listSimPS, energy_listSimSPSA, iterations, layers,i='_HOH_phi=1.75')
+#plots.plotOptimisation(Hmatrix, energy_listSimFOGD, energy_listSimSOGD, energy_listSimPS, energy_listSimSPSA, iterations, layers,i=f'_HOH_phi=1.75_eta={eta}')
 
-approxESim = []
+approxESim1 = []
+approxESim2 = []
+approxESim3 = []
 for phi in phis:
-	with open(f'../pklFiles/H2O/energy_listSimPS_phi={phi}_layers={layers}_iteration={iterations}','rb') as f:
-		energy_listSim = pickle.load(f)
-	approxESim.append(energy_listSim[-1])
+	with open(f'../pklFiles/H2O/energy_listSimPS_phi={phi}_layers=1_iteration={iterations}','rb') as f:
+		energy_listSim1 = pickle.load(f)
+	approxESim1.append(energy_listSim1[-1])
+	with open(f'../pklFiles/H2O/energy_listSimPS_phi={phi}_layers=2_iteration={iterations}','rb') as f:
+		energy_listSim2 = pickle.load(f)
+	approxESim2.append(energy_listSim2[-1])
+	with open(f'../pklFiles/H2O/energy_listSimPS_phi={phi}_layers=3_iteration={iterations}','rb') as f:
+		energy_listSim3 = pickle.load(f)
+	approxESim3.append(energy_listSim3[-1])
   
-plots.plotEAgainstR(phis, exactEArray, approxESim, layers, 'PS')
+plots.plotEAgainstPhi(phis, exactEArray, approxESim1, approxESim2, approxESim3, '1&2&3', 'PS')
